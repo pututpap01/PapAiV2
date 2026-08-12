@@ -57,13 +57,13 @@ fun VideoGeneratorScreen() {
     var selectedEngineKey by remember { mutableStateOf("wan21_fast") }
 
     val currentUrl = when (selectedEngineKey) {
-        "wan21_fast" -> "https://huggingface.co/spaces/multimodalart/Wan2.1-Fast"
-        "seedance_ai" -> "https://huggingface.co/spaces/silenox/Seedance-2-AI-Video-Generator"
+        "wan21_fast" -> "https://multimodalart-wan2-1-fast.hf.space"
+        "ltx_video" -> "https://lightricks-ltx-video-fast.hf.space"
         "kling_ai" -> "https://klingai.com"
-        "perchance_video" -> "https://perchance.org/ai-video-generator"
-        "wan21_studio" -> "https://huggingface.co/spaces/Wan-AI/Wan2.1"
+        "hunyuan_video" -> "https://multimodalart-hunyuanvideo-1-5-i2v-480p.hf.space"
+        "wan21_studio" -> "https://wan-ai-wan2-1.hf.space"
         "easemate_ai" -> "https://www.easemate.ai/image-to-video-ai.html"
-        else -> "https://perchance.org/ai-video-generator"
+        else -> "https://multimodalart-wan2-1-fast.hf.space"
     }
 
     var webViewInstance by remember { mutableStateOf<android.webkit.WebView?>(null) }
@@ -172,43 +172,9 @@ fun VideoGeneratorScreen() {
                     )
 
                     FilterChip(
-                        selected = selectedEngineKey == "seedance_ai",
-                        onClick = { selectedEngineKey = "seedance_ai" },
-                        label = { Text("Seedance 2.0 AI", fontSize = 12.sp) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Movie,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF7C3AED),
-                            selectedLabelColor = Color.White
-                        )
-                    )
-
-                    FilterChip(
-                        selected = selectedEngineKey == "kling_ai",
-                        onClick = { selectedEngineKey = "kling_ai" },
-                        label = { Text("Kling AI (Official)", fontSize = 12.sp) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Movie,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFFE11D48),
-                            selectedLabelColor = Color.White
-                        )
-                    )
-
-                    FilterChip(
-                        selected = selectedEngineKey == "perchance_video",
-                        onClick = { selectedEngineKey = "perchance_video" },
-                        label = { Text("Perchance Video (Uncensored)", fontSize = 12.sp) },
+                        selected = selectedEngineKey == "ltx_video",
+                        onClick = { selectedEngineKey = "ltx_video" },
+                        label = { Text("LTX Video Fast", fontSize = 12.sp) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.AutoAwesome,
@@ -223,11 +189,38 @@ fun VideoGeneratorScreen() {
                     )
 
                     FilterChip(
+                        selected = selectedEngineKey == "hunyuan_video",
+                        onClick = { selectedEngineKey = "hunyuan_video" },
+                        label = { Text("Hunyuan Video 1.5", fontSize = 12.sp) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Movie,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF7C3AED),
+                            selectedLabelColor = Color.White
+                        )
+                    )
+
+                    FilterChip(
                         selected = selectedEngineKey == "wan21_studio",
                         onClick = { selectedEngineKey = "wan21_studio" },
                         label = { Text("Wan 2.1 Official", fontSize = 12.sp) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Color(0xFF10B981),
+                            selectedLabelColor = Color.White
+                        )
+                    )
+
+                    FilterChip(
+                        selected = selectedEngineKey == "kling_ai",
+                        onClick = { selectedEngineKey = "kling_ai" },
+                        label = { Text("Kling AI (Official)", fontSize = 12.sp) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFFE11D48),
                             selectedLabelColor = Color.White
                         )
                     )
