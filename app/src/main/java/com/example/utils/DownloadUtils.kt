@@ -100,7 +100,40 @@ object DownloadUtils {
         downloadManager.enqueue(request)
 
         android.os.Handler(android.os.Looper.getMainLooper()).post {
-            Toast.makeText(context, "Pengunduhan dimulai...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Pengunduhan gambar dimulai...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    suspend fun saveVideoFromUrl(
+        context: Context,
+        url: String,
+        fileNamePrefix: String = "PapAI_Video"
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                val filename = "${fileNamePrefix}_${System.currentTimeMillis()}.mp4"
+                val request = DownloadManager.Request(Uri.parse(url)).apply {
+                    setTitle("Mengunduh Video Pap AI")
+                    setDescription("Mengunduh hasil video Wan2.2 / AI...")
+                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, "PapAI/$filename")
+                    setMimeType("video/mp4")
+                    setAllowedOverMetered(true)
+                    setAllowedOverRoaming(true)
+                }
+
+                val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                downloadManager.enqueue(request)
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Pengunduhan video dimulai ke folder Movies/PapAI...", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Gagal mengunduh video: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 }

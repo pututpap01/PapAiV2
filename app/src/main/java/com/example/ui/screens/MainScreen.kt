@@ -22,7 +22,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SignalWifiOff
 import androidx.compose.material3.Button
@@ -32,6 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,13 +65,15 @@ fun MainScreen() {
     val context = LocalContext.current
     val targetUrl = "https://perchance.org/papaigeneratorv2"
 
+    var selectedTab by remember { mutableStateOf("image") } // "image" or "video"
+
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember { mutableIntStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
 
-    // Handle system back button for WebView navigation
-    BackHandler(enabled = webViewInstance?.canGoBack() == true) {
+    // Handle system back button for WebView navigation when in image tab
+    BackHandler(enabled = selectedTab == "image" && webViewInstance?.canGoBack() == true) {
         webViewInstance?.goBack()
     }
 
@@ -85,16 +92,17 @@ fun MainScreen() {
                                     .clip(CircleShape)
                                     .background(
                                         Brush.linearGradient(
-                                            colors = listOf(
-                                                Color(0xFF8E2DE2),
-                                                Color(0xFF4A00E0)
-                                            )
+                                            colors = if (selectedTab == "image") {
+                                                listOf(Color(0xFF8E2DE2), Color(0xFF4A00E0))
+                                            } else {
+                                                listOf(Color(0xFFFF416C), Color(0xFFFF4B2B))
+                                            }
                                         )
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
+                                    imageVector = if (selectedTab == "image") Icons.Default.AutoAwesome else Icons.Default.Movie,
                                     contentDescription = "AI Icon",
                                     tint = Color.White,
                                     modifier = Modifier.size(20.dp)
@@ -103,13 +111,13 @@ fun MainScreen() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "PapAI Generator",
+                                    text = if (selectedTab == "image") "PapAI Generator" else "PapAI Video Studio",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "AI Image Generator",
+                                    text = if (selectedTab == "image") "AI Image Generator" else "Wan 2.2 / Wan 2.1 Video Engine",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -117,31 +125,33 @@ fun MainScreen() {
                         }
                     },
                     actions = {
-                        IconButton(
-                            onClick = {
-                                Toast.makeText(
-                                    context,
-                                    "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                        if (selectedTab == "image") {
+                            IconButton(
+                                onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Security Status",
+                                    tint = Color(0xFF10B981)
+                                )
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Security Status",
-                                tint = Color(0xFF10B981)
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                hasError = false
-                                webViewInstance?.reload()
+                            IconButton(
+                                onClick = {
+                                    hasError = false
+                                    webViewInstance?.reload()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Muat Ulang"
+                                )
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Muat Ulang"
-                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -149,21 +159,63 @@ fun MainScreen() {
                     )
                 )
 
-                // Loading Bar
-                AnimatedVisibility(
-                    visible = isLoading && loadingProgress < 100,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    LinearProgressIndicator(
-                        progress = { loadingProgress / 100f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = Color(0xFF8E2DE2),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                // Loading Bar for WebView
+                if (selectedTab == "image") {
+                    AnimatedVisibility(
+                        visible = isLoading && loadingProgress < 100,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { loadingProgress / 100f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(3.dp),
+                            color = Color(0xFF8E2DE2),
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
                 }
+            }
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp
+            ) {
+                NavigationBarItem(
+                    selected = selectedTab == "image",
+                    onClick = { selectedTab = "image" },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "Gambar AI"
+                        )
+                    },
+                    label = { Text("Gambar AI") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF8E2DE2),
+                        selectedTextColor = Color(0xFF8E2DE2),
+                        indicatorColor = Color(0xFF8E2DE2).copy(alpha = 0.15f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == "video",
+                    onClick = { selectedTab = "video" },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Movie,
+                            contentDescription = "Video AI Wan2.2"
+                        )
+                    },
+                    label = { Text("Video AI (Wan2.2)") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFFFF416C),
+                        selectedTextColor = Color(0xFFFF416C),
+                        indicatorColor = Color(0xFFFF416C).copy(alpha = 0.15f)
+                    )
+                )
             }
         }
     ) { innerPadding ->
@@ -172,85 +224,90 @@ fun MainScreen() {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            GeneratorWebView(
-                url = targetUrl,
-                webViewRef = { webViewInstance = it },
-                onProgressChanged = { progress ->
-                    loadingProgress = progress
-                    isLoading = progress < 100
-                },
-                onPageStarted = {
-                    isLoading = true
-                },
-                onPageFinished = {
-                    isLoading = false
-                },
-                onError = { isErr ->
-                    hasError = isErr
-                }
-            )
+            if (selectedTab == "image") {
+                GeneratorWebView(
+                    url = targetUrl,
+                    webViewRef = { webViewInstance = it },
+                    onProgressChanged = { progress ->
+                        loadingProgress = progress
+                        isLoading = progress < 100
+                    },
+                    onPageStarted = {
+                        isLoading = true
+                    },
+                    onPageFinished = {
+                        isLoading = false
+                    },
+                    onError = { isErr ->
+                        hasError = isErr
+                    }
+                )
 
-            // Offline or Connection Error Screen
-            if (hasError) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                // Offline or Connection Error Screen
+                if (hasError) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
                     ) {
-                        Box(
+                        Column(
                             modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)),
-                            contentAlignment = Alignment.Center
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.SignalWifiOff,
-                                contentDescription = "Error Icon",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(40.dp)
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SignalWifiOff,
+                                    contentDescription = "Error Icon",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Text(
+                                text = "Gagal Memuat Generator",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
-                        }
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Text(
-                            text = "Gagal Memuat Generator",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Pastikan koneksi internet Anda aktif lalu coba muat ulang halaman.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            onClick = {
-                                hasError = false
-                                webViewInstance?.reload()
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF8E2DE2)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Pastikan koneksi internet Anda aktif lalu coba muat ulang halaman.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Coba Lagi")
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(
+                                onClick = {
+                                    hasError = false
+                                    webViewInstance?.reload()
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF8E2DE2)
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Coba Lagi")
+                            }
                         }
                     }
                 }
+            } else {
+                VideoGeneratorScreen()
             }
         }
     }
 }
+
