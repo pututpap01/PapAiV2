@@ -19,9 +19,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
@@ -29,22 +26,23 @@ jobs:
 
     - name: Accept Android SDK Licenses
       run: |
-        SDKMANAGER=$(find $ANDROID_HOME -name sdkmanager | head -n 1)
-        if [ -n "$SDKMANAGER" ]; then
-          yes | $SDKMANAGER --licenses || true
-        fi
+        SDK_PATH="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+        mkdir -p "$SDK_PATH/licenses"
+        printf "89339af1705d50bea156801928b84318b382815a\nd56f5187479451eabf01fb78af6dfcb131a6481e\n243308028026e7d49401be651431db282ac37683\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735\nd938870314652a3760be04a06921a1202a9685a3" > "$SDK_PATH/licenses/android-sdk-license"
+        printf "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735" > "$SDK_PATH/licenses/android-sdk-preview-license"
 
-    - name: Create .env and google-services.json if missing
+    - name: Prepare build environment
       run: |
         if [ ! -f .env ]; then
-          cp .env.example .env || echo "GEMINI_API_KEY=" > .env
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            echo "GEMINI_API_KEY=" > .env
+          fi
         fi
         if [ ! -f app/google-services.json ]; then
           echo '{"project_info":{"project_number":"123456789012","project_id":"dummy-project","storage_bucket":"dummy-project.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789012:android:1234567890123456789012","android_client_info":{"package_name":"com.aistudio.papagenerator.wvapp"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyDummyKeyForGoogleServices12345"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
         fi
-
-    - name: Decode debug keystore
-      run: |
         if [ -f debug.keystore.base64 ]; then
           base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || base64 --decode debug.keystore.base64 > debug.keystore 2>/dev/null || rm -f debug.keystore
           if [ ! -s debug.keystore ]; then
@@ -53,10 +51,11 @@ jobs:
         fi
 
     - name: Build Debug APK
-      run: gradle assembleDebug --no-daemon --no-configuration-cache --stacktrace
+      run: gradle assembleDebug --no-daemon --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: PapAI-Generator-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk/debug/*.apk
+
