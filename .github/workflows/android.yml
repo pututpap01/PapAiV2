@@ -24,10 +24,13 @@ jobs:
       with:
         gradle-version: '8.11.1'
 
-    - name: Create .env file if missing
+    - name: Create .env and google-services.json if missing
       run: |
         if [ ! -f .env ]; then
           cp .env.example .env || echo "GEMINI_API_KEY=" > .env
+        fi
+        if [ ! -f app/google-services.json ]; then
+          echo '{"project_info":{"project_number":"123456789012","project_id":"dummy-project","storage_bucket":"dummy-project.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789012:android:1234567890123456789012","android_client_info":{"package_name":"com.aistudio.papagenerator.wvapp"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyDummyKeyForGoogleServices12345"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
         fi
 
     - name: Decode debug keystore
@@ -37,7 +40,7 @@ jobs:
         fi
 
     - name: Build Debug APK
-      run: gradle assembleDebug --no-daemon
+      run: gradle assembleDebug --no-daemon --no-configuration-cache --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
