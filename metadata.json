@@ -1,0 +1,6 @@
+{
+  "name": "PapAI Generator",
+  "description": "Aplikasi Pap AI Generator dari Perchance tanpa header Perchance",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
