@@ -24,16 +24,20 @@ jobs:
       with:
         gradle-version: '8.11.1'
 
+    - name: Create .env file if missing
+      run: |
+        if [ ! -f .env ]; then
+          cp .env.example .env || echo "GEMINI_API_KEY=" > .env
+        fi
+
     - name: Decode debug keystore
       run: |
         if [ -f debug.keystore.base64 ]; then
-          base64 -d debug.keystore.base64 > debug.keystore
-        elif [ -f debug.keystore.base64 ]; then
-          base64 --decode debug.keystore.base64 > debug.keystore
+          base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || base64 --decode debug.keystore.base64 > debug.keystore 2>/dev/null || true
         fi
 
     - name: Build Debug APK
-      run: gradle assembleDebug
+      run: gradle assembleDebug --no-daemon
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
