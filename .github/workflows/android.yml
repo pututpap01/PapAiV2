@@ -28,7 +28,11 @@ jobs:
         gradle-version: '8.11.1'
 
     - name: Accept Android SDK Licenses
-      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+      run: |
+        SDKMANAGER=$(find $ANDROID_HOME -name sdkmanager | head -n 1)
+        if [ -n "$SDKMANAGER" ]; then
+          yes | $SDKMANAGER --licenses || true
+        fi
 
     - name: Create .env and google-services.json if missing
       run: |
