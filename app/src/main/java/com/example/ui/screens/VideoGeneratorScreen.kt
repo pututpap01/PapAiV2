@@ -58,6 +58,7 @@ fun VideoGeneratorScreen() {
 
     val currentUrl = when (selectedEngineKey) {
         "wan21_fast" -> "https://huggingface.co/spaces/multimodalart/Wan2.1-Fast"
+        "seedance_ai" -> "https://huggingface.co/spaces/silenox/Seedance-2-AI-Video-Generator"
         "kling_ai" -> "https://klingai.com"
         "perchance_video" -> "https://perchance.org/ai-video-generator"
         "wan21_studio" -> "https://huggingface.co/spaces/Wan-AI/Wan2.1"
@@ -166,6 +167,23 @@ fun VideoGeneratorScreen() {
                         },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Color(0xFFFF416C),
+                            selectedLabelColor = Color.White
+                        )
+                    )
+
+                    FilterChip(
+                        selected = selectedEngineKey == "seedance_ai",
+                        onClick = { selectedEngineKey = "seedance_ai" },
+                        label = { Text("Seedance 2.0 AI", fontSize = 12.sp) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Movie,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Color(0xFF7C3AED),
                             selectedLabelColor = Color.White
                         )
                     )
