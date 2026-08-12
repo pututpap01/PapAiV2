@@ -52,6 +52,9 @@ jobs:
       with:
         validate-wrappers: false
 
+    - name: Regenerate Gradle Wrapper
+      run: gradle wrapper
+
     - name: Build Debug APK
       run: ./gradlew assembleDebug --no-daemon --stacktrace
 
