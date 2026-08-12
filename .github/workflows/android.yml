@@ -37,13 +37,12 @@ jobs:
 
     - name: Accept Android SDK Licenses
       run: |
-        for SDK_DIR in "$ANDROID_HOME" "/usr/local/lib/android/sdk" "/sdks/android/sdk"; do
-          if [ -n "$SDK_DIR" ]; then
-            mkdir -p "$SDK_DIR/licenses"
-            printf "89339af1705d50bea156801928b84318b382815a\nd56f5187479451eabf01fb78af6dfcb131a6481e\n243308028026e7d49401be651431db282ac37683\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735\nd938870314652a3760be04a06921a1202a9685a3\n33b622e746b0709770fbe4f6d3d5644e001c3422" > "$SDK_DIR/licenses/android-sdk-license"
-            printf "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735" > "$SDK_DIR/licenses/android-sdk-preview-license"
-          fi
-        done
+        SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+        if [ -d "$SDK_PATH" ]; then
+          mkdir -p "$SDK_PATH/licenses"
+          printf "89339af1705d50bea156801928b84318b382815a\nd56f5187479451eabf01fb78af6dfcb131a6481e\n243308028026e7d49401be651431db282ac37683\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735\nd938870314652a3760be04a06921a1202a9685a3\n33b622e746b0709770fbe4f6d3d5644e001c3422" > "$SDK_PATH/licenses/android-sdk-license"
+          printf "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c00507297be7305df2a9549d2d683735" > "$SDK_PATH/licenses/android-sdk-preview-license"
+        fi
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
