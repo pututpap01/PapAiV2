@@ -22,9 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SignalWifiOff
 import androidx.compose.material3.Button
@@ -34,9 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,6 +52,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.VideoCameraBack
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import com.example.ui.components.GeneratorWebView
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,14 +65,14 @@ fun MainScreen() {
     val context = LocalContext.current
     val targetUrl = "https://perchance.org/papaigeneratorv2"
 
-    var selectedTab by remember { mutableStateOf("image") } // "image" or "video"
+    var selectedTab by remember { mutableStateOf("image") } // "image" or "colab"
 
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember { mutableIntStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
 
-    // Handle system back button for WebView navigation when in image tab
+    // Handle system back button for WebView navigation
     BackHandler(enabled = selectedTab == "image" && webViewInstance?.canGoBack() == true) {
         webViewInstance?.goBack()
     }
@@ -92,17 +92,13 @@ fun MainScreen() {
                                     .clip(CircleShape)
                                     .background(
                                         Brush.linearGradient(
-                                            colors = if (selectedTab == "image") {
-                                                listOf(Color(0xFF8E2DE2), Color(0xFF4A00E0))
-                                            } else {
-                                                listOf(Color(0xFFFF416C), Color(0xFFFF4B2B))
-                                            }
+                                            colors = listOf(Color(0xFF8E2DE2), Color(0xFF4A00E0))
                                         )
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = if (selectedTab == "image") Icons.Default.AutoAwesome else Icons.Default.Movie,
+                                    imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = "AI Icon",
                                     tint = Color.White,
                                     modifier = Modifier.size(20.dp)
@@ -111,13 +107,13 @@ fun MainScreen() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = if (selectedTab == "image") "PapAI Image Studio" else "PapAI Video Studio",
+                                    text = if (selectedTab == "image") "PapAI Generator" else "Colab Video Studio",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = if (selectedTab == "image") "AI Image Generator & Image Edit" else "Wan 2.2 / Wan 2.1 Video Engine",
+                                    text = if (selectedTab == "image") "AI Image Generator" else "Google Colab T4 GPU Server",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -125,26 +121,57 @@ fun MainScreen() {
                         }
                     },
                     actions = {
-                        IconButton(
-                            onClick = {
-                                Toast.makeText(
-                                    context,
-                                    "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                        if (selectedTab == "image") {
+                            IconButton(
+                                onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Security Status",
+                                    tint = Color(0xFF10B981)
+                                )
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Security Status",
-                                tint = Color(0xFF10B981)
-                            )
+                            IconButton(
+                                onClick = {
+                                    hasError = false
+                                    webViewInstance?.reload()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Muat Ulang"
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
+
+                // Loading Bar for WebView
+                if (selectedTab == "image") {
+                    AnimatedVisibility(
+                        visible = isLoading && loadingProgress < 100,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { loadingProgress / 100f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(3.dp),
+                            color = Color(0xFF8E2DE2),
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
+                }
             }
         },
         bottomBar = {
@@ -170,19 +197,19 @@ fun MainScreen() {
                 )
 
                 NavigationBarItem(
-                    selected = selectedTab == "video",
-                    onClick = { selectedTab = "video" },
+                    selected = selectedTab == "colab",
+                    onClick = { selectedTab = "colab" },
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Movie,
-                            contentDescription = "Video AI Wan2.2"
+                            imageVector = Icons.Default.VideoCameraBack,
+                            contentDescription = "Colab Video AI"
                         )
                     },
-                    label = { Text("Video AI (Wan2.2)") },
+                    label = { Text("Colab Video") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFFFF416C),
-                        selectedTextColor = Color(0xFFFF416C),
-                        indicatorColor = Color(0xFFFF416C).copy(alpha = 0.15f)
+                        selectedIconColor = Color(0xFF8E2DE2),
+                        selectedTextColor = Color(0xFF8E2DE2),
+                        indicatorColor = Color(0xFF8E2DE2).copy(alpha = 0.15f)
                     )
                 )
             }
@@ -194,11 +221,90 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             if (selectedTab == "image") {
-                ImageGeneratorScreen()
+                GeneratorWebView(
+                    url = targetUrl,
+                    webViewRef = { webViewInstance = it },
+                    onProgressChanged = { progress ->
+                        loadingProgress = progress
+                        isLoading = progress < 100
+                    },
+                    onPageStarted = {
+                        isLoading = true
+                    },
+                    onPageFinished = {
+                        isLoading = false
+                    },
+                    onError = { isErr ->
+                        hasError = isErr
+                    }
+                )
+
+                // Offline or Connection Error Screen
+                if (hasError) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SignalWifiOff,
+                                    contentDescription = "Error Icon",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Text(
+                                text = "Gagal Memuat Generator",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Pastikan koneksi internet Anda aktif lalu coba muat ulang halaman.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(
+                                onClick = {
+                                    hasError = false
+                                    webViewInstance?.reload()
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF8E2DE2)
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Coba Lagi")
+                            }
+                        }
+                    }
+                }
             } else {
-                VideoGeneratorScreen()
+                ColabVideoScreen()
             }
         }
     }
 }
+
 
