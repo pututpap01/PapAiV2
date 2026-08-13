@@ -233,20 +233,22 @@ fun GeneratorWebView(
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val reqUrl = request?.url?.toString() ?: return false
                     
-                    // Allow perchance generator page and user asset frames
-                    if (reqUrl.contains("perchance.org/papaigeneratorv2") ||
+                    // Lock down perchance code editor and account settings
+                    if (reqUrl.contains("perchance.org/edit") || reqUrl.contains("perchance.org/account") || reqUrl.contains("perchance.org/welcome")) {
+                        Toast.makeText(context, "Menu edit kode & akun dikunci.", Toast.LENGTH_SHORT).show()
+                        return true
+                    }
+
+                    // Allow generator pages, user uploads, API, hf.space, blob/data URLs
+                    if (reqUrl.contains("perchance.org") ||
                         reqUrl.contains("user-uploads.perchance.org") ||
-                        reqUrl.contains("perchance.org/api") ||
+                        reqUrl.contains("hf.space") ||
+                        reqUrl.contains("huggingface.co") ||
+                        reqUrl.contains("easemate.ai") ||
                         reqUrl.startsWith("data:") ||
                         reqUrl.startsWith("blob:")
                     ) {
                         return false
-                    }
-
-                    // Lock down edit and account pages
-                    if (reqUrl.contains("/edit") || reqUrl.contains("/account") || reqUrl.contains("perchance.org/welcome")) {
-                        Toast.makeText(context, "Menu edit & akun dikunci.", Toast.LENGTH_SHORT).show()
-                        return true
                     }
 
                     return false

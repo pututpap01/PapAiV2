@@ -111,13 +111,13 @@ fun MainScreen() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = if (selectedTab == "image") "PapAI Generator" else "PapAI Video Studio",
+                                    text = if (selectedTab == "image") "PapAI Image Studio" else "PapAI Video Studio",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = if (selectedTab == "image") "AI Image Generator" else "Wan 2.2 / Wan 2.1 Video Engine",
+                                    text = if (selectedTab == "image") "AI Image Generator & Image Edit" else "Wan 2.2 / Wan 2.1 Video Engine",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -125,57 +125,26 @@ fun MainScreen() {
                         }
                     },
                     actions = {
-                        if (selectedTab == "image") {
-                            IconButton(
-                                onClick = {
-                                    Toast.makeText(
-                                        context,
-                                        "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Lock,
-                                    contentDescription = "Security Status",
-                                    tint = Color(0xFF10B981)
-                                )
+                        IconButton(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Aplikasi terkunci: Header Perchance telah disembunyikan & elemen dikunci.",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
-                            IconButton(
-                                onClick = {
-                                    hasError = false
-                                    webViewInstance?.reload()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Muat Ulang"
-                                )
-                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Security Status",
+                                tint = Color(0xFF10B981)
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
-
-                // Loading Bar for WebView
-                if (selectedTab == "image") {
-                    AnimatedVisibility(
-                        visible = isLoading && loadingProgress < 100,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        LinearProgressIndicator(
-                            progress = { loadingProgress / 100f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(3.dp),
-                            color = Color(0xFF8E2DE2),
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    }
-                }
             }
         },
         bottomBar = {
@@ -225,85 +194,7 @@ fun MainScreen() {
                 .padding(innerPadding)
         ) {
             if (selectedTab == "image") {
-                GeneratorWebView(
-                    url = targetUrl,
-                    webViewRef = { webViewInstance = it },
-                    onProgressChanged = { progress ->
-                        loadingProgress = progress
-                        isLoading = progress < 100
-                    },
-                    onPageStarted = {
-                        isLoading = true
-                    },
-                    onPageFinished = {
-                        isLoading = false
-                    },
-                    onError = { isErr ->
-                        hasError = isErr
-                    }
-                )
-
-                // Offline or Connection Error Screen
-                if (hasError) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SignalWifiOff,
-                                    contentDescription = "Error Icon",
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(40.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text(
-                                text = "Gagal Memuat Generator",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Pastikan koneksi internet Anda aktif lalu coba muat ulang halaman.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Button(
-                                onClick = {
-                                    hasError = false
-                                    webViewInstance?.reload()
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF8E2DE2)
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Coba Lagi")
-                            }
-                        }
-                    }
-                }
+                ImageGeneratorScreen()
             } else {
                 VideoGeneratorScreen()
             }
